@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Perps DEX Microstructure — Top 20 by Open Interest</title>
+<meta name="description" content="Matching engine, order-priority rules, settlement architecture and execution latency for the twenty largest perpetuals DEXs by open interest. Primary-source verified; inference and vendor marketing labelled as such.">
+<meta name="author" content="seldon">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0c0d10">
+<link rel="canonical" href="__SITE_URL__/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c0d10'/%3E%3Crect x='7' y='9' width='4' height='14' rx='1.5' fill='%237aa2f7'/%3E%3Crect x='14' y='6' width='4' height='20' rx='1.5' fill='%235fd3a6'/%3E%3Crect x='21' y='13' width='4' height='10' rx='1.5' fill='%23e0a458'/%3E%3C/svg%3E">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Perps DEX Microstructure">
+<meta property="og:title" content="Perps DEX Market Microstructure — Top 20 by Open Interest">
+<meta property="og:description" content="Matching engine, order priority, settlement architecture and execution latency for the twenty largest perpetuals venues. Every claim sourced to primary protocol documentation.">
+<meta property="og:url" content="__SITE_URL__/">
+<meta property="og:image" content="__SITE_URL__/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Perps DEX Market Microstructure — reference table covering 20 venues, 6 speedbump regimes, 4 disputed claims. Snapshot 30 July 2026.">
+<meta property="article:published_time" content="2026-07-30">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Perps DEX Market Microstructure — Top 20 by Open Interest">
+<meta name="twitter:description" content="Matching engine, order priority, settlement architecture and execution latency for the twenty largest perpetuals venues. Every claim sourced to primary protocol documentation.">
+<meta name="twitter:image" content="__SITE_URL__/og.png">
+<style>
+  :root{
+    --bg:#0c0d10; --panel:#131519; --panel2:#181b21; --line:#252932;
+    --ink:#e8eaef; --ink2:#a2a9b8; --ink3:#6e7686;
+    --acc:#7aa2f7; --doc:#5fd3a6; --est:#e0a458; --mkt:#d76b7d; --nd:#6e7686;
+    --clob:#7aa2f7; --pool:#c586e0; --rfq:#5fd3a6; --hyb:#e0a458;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1720px;margin:0 auto;padding:34px 26px 90px}
+  header{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:22px}
+  h1{font-size:25px;margin:0 0 8px;letter-spacing:-.02em;font-weight:650}
+  .sub{color:var(--ink2);font-size:13.5px;max-width:104ch}
+  .meta{color:var(--ink3);font-size:12.5px;margin-top:10px}
+  code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--ink2)}
+
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:20px 0 14px}
+  .bar .lbl{color:var(--ink3);font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;margin-right:2px}
+  button.chip{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink2);
+    padding:5px 11px;border-radius:999px;font-size:12.5px;cursor:pointer;font-family:inherit;
+    transition:.13s;
+  }
+  button.chip:hover{border-color:#39404e;color:var(--ink)}
+  button.chip[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:#0c0d10;font-weight:600}
+  input.search{
+    background:var(--panel);border:1px solid var(--line);color:var(--ink);
+    padding:6px 12px;border-radius:8px;font-size:13px;min-width:230px;font-family:inherit;
+  }
+  input.search:focus{outline:none;border-color:var(--acc)}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 18px;font-size:12.2px;color:var(--ink2)}
+  .legend span{display:flex;align-items:center;gap:6px}
+
+  .tag{
+    display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700;
+    letter-spacing:.05em;vertical-align:1.5px;
+  }
+  .t-doc{background:rgba(95,211,166,.15);color:var(--doc);border:1px solid rgba(95,211,166,.3)}
+  .t-est{background:rgba(224,164,88,.14);color:var(--est);border:1px solid rgba(224,164,88,.3)}
+  .t-mkt{background:rgba(215,107,125,.14);color:var(--mkt);border:1px solid rgba(215,107,125,.3)}
+  .t-nd{background:rgba(110,118,134,.15);color:var(--nd);border:1px solid rgba(110,118,134,.32)}
+
+  .tblwrap{border:1px solid var(--line);border-radius:12px;overflow:auto;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;min-width:1560px}
+  thead th{
+    position:sticky;top:0;z-index:3;background:#10131a;text-align:left;
+    padding:11px 13px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--ink3);border-bottom:1px solid var(--line);font-weight:650;white-space:nowrap;
+  }
+  thead th.sortable{cursor:pointer;user-select:none}
+  thead th.sortable:hover{color:var(--ink)}
+  thead th .ar{opacity:.4;font-size:9px;margin-left:3px}
+  tbody td{padding:13px;border-bottom:1px solid var(--line);vertical-align:top;font-size:13px}
+  tbody tr:hover{background:#161920}
+  tbody tr.det td{background:#0f1116;border-bottom:1px solid var(--line)}
+
+  .rank{color:var(--ink3);font-variant-numeric:tabular-nums;font-size:12.5px}
+  .nm{font-weight:650;font-size:14px;letter-spacing:-.01em}
+  .oi{color:var(--ink3);font-size:11.5px;font-variant-numeric:tabular-nums;margin-top:2px}
+  .chain{color:var(--ink3);font-size:11px;margin-top:3px}
+  .toggle{
+    margin-top:7px;background:none;border:1px solid var(--line);color:var(--ink3);
+    font-size:10.5px;padding:2px 7px;border-radius:5px;cursor:pointer;font-family:inherit;
+  }
+  .toggle:hover{color:var(--acc);border-color:var(--acc)}
+
+  .eng{font-weight:600;font-size:12px;letter-spacing:.02em;display:inline-block;
+       padding:2px 8px;border-radius:5px;margin-bottom:6px}
+  .e-clob{background:rgba(122,162,247,.13);color:var(--clob)}
+  .e-pool{background:rgba(197,134,224,.13);color:var(--pool)}
+  .e-rfq{background:rgba(95,211,166,.13);color:var(--rfq)}
+  .e-hyb{background:rgba(224,164,88,.13);color:var(--est)}
+
+  .lat{font-weight:650;font-size:14px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .lat2{color:var(--ink2);font-size:11.5px;margin-top:4px;line-height:1.45}
+
+  .cellsub{color:var(--ink2);font-size:12.3px;line-height:1.5}
+  .cellsub b{color:var(--ink);font-weight:600}
+  ul.n{margin:0;padding-left:15px}
+  ul.n li{margin-bottom:5px;color:var(--ink2);font-size:12.3px;line-height:1.5}
+  ul.n li:last-child{margin-bottom:0}
+  ul.n li b{color:var(--ink);font-weight:600}
+  .flag{color:var(--mkt)}
+
+  .detail{padding:4px 2px 6px;font-size:12.5px;color:var(--ink2);line-height:1.62}
+  .detail h4{margin:0 0 5px;font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);font-weight:650}
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:18px}
+
+  .colw-eng{width:186px} .colw-nm{width:172px} .colw-lat{width:212px}
+  .colw-arch{width:270px} .colw-micro{width:330px}
+
+  footer{margin-top:34px;color:var(--ink3);font-size:12.2px;line-height:1.65;max-width:112ch}
+  footer b{color:var(--ink2)}
+  .empty{padding:36px;text-align:center;color:var(--ink3)}
+  @media(max-width:900px){.wrap{padding:20px 12px 60px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Perps DEX Market Microstructure — Top 20 by Open Interest</h1>
+  <div class="sub">
+    Matching engine, order-priority rules, architecture and execution latency for the twenty largest perpetuals venues
+    on DefiLlama ranked by open interest. Every claim is drawn from primary protocol documentation where one exists;
+    inference and vendor marketing are labelled as such rather than presented as fact.
+  </div>
+  <div class="meta">
+    Ranking snapshot: <b>30 July 2026</b>, DefiLlama <code>/open-interest</code> (perps-filtered; prediction markets excluded).
+    Ranks 7–20 reorder between intraday snapshots — top-20 <i>membership</i> is robust, exact ordering within that band is not.
+  </div>
+</header>
+
+<div class="legend">
+  <span><span class="tag t-doc">DOC</span> published in primary docs</span>
+  <span><span class="tag t-est">EST</span> my estimate, basis stated</span>
+  <span><span class="tag t-mkt">MKTG</span> vendor claim, no methodology</span>
+  <span><span class="tag t-nd">N/D</span> not disclosed anywhere</span>
+</div>
+
+<div class="bar">
+  <span class="lbl">Engine</span>
+  <button class="chip" data-f="all" aria-pressed="true">All 20</button>
+  <button class="chip" data-f="CLOB">CLOB</button>
+  <button class="chip" data-f="Pool">Oracle-priced pool</button>
+  <button class="chip" data-f="RFQ">RFQ</button>
+  <button class="chip" data-f="Other">Other</button>
+  <span style="flex:1"></span>
+  <input class="search" id="q" placeholder="Search name, mechanism, note…" autocomplete="off">
+  <button class="chip" id="expandAll">Expand all</button>
+</div>
+
+<div class="tblwrap">
+<table id="t">
+<thead>
+  <tr>
+    <th class="sortable colw-nm" data-k="rank">Protocol <span class="ar">▲</span></th>
+    <th class="colw-eng">Matching engine</th>
+    <th class="colw-micro">Microstructure</th>
+    <th class="colw-arch">Architecture</th>
+    <th class="sortable colw-lat" data-k="latSort">Latency <span class="ar">↕</span></th>
+    <th>Notes</th>
+  </tr>
+</thead>
+<tbody id="tb"></tbody>
+</table>
+</div>
+
+<div class="empty" id="empty" style="display:none">No venues match that filter.</div>
+
+<footer>
+  <p><b>On the latency column.</b> It reports median market-order execution — order submission to fill acknowledgement — not
+  settlement finality, which is often three to five orders of magnitude slower. Only five venues publish a real end-to-end
+  figure (Hyperliquid, Vest, Ostium, GMX, Nado). Several publish a matching-engine number that is not achievable in practice
+  because a deliberate speedbump sits in front of it: GRVT quotes &lt;2 ms matching but delays takers 25–50 ms, and QFEX
+  markets "microsecond-level latency" against a documented 100 ms speed bump. Where a venue publishes nothing, the estimate's
+  basis is stated in the expanded row.</p>
+
+  <p><b>The finding that cuts across the table.</b> Six of twenty venues — Lighter, GRVT, Pacifica, Nado, QFEX and, in
+  paid-inverse form, Hyperliquid — have abandoned pure FCFS in favour of explicit maker protection. Four impose an asymmetric
+  taker delay with post-only orders exempt (50 ms Nado, 25–50 ms GRVT, 100 ms QFEX, ~200 ms Pacifica); Lighter goes furthest
+  at 0 ms for Premium makers against 140–300 ms for takers, and says outright that this is market-structure policy. Hyperliquid
+  inverts the model, selling queue priority at up to 8 bp (≈45 ms per bp) while structurally prioritising cancels over
+  aggressors. Adverse-selection protection, not latency racing, is now the dominant design axis in onchain perps.</p>
+
+  <p><b>Caveats worth carrying.</b> Price-time priority is <i>undocumented</i> at edgeX, Extended, ApeX, Pacifica, StandX,
+  Nado, Ondo and Aster — assumed by convention, never stated. Aster's volumes were delisted then relisted by DefiLlama over
+  wash-trading concerns DefiLlama still calls unverifiable. Antarctic publishes no protocol spec, contracts or audits.
+  GMTrade's OI reads between $58 m and $279 m depending on the DefiLlama endpoint, and Ostium's between $46 m and $316 m.
+  StandX turns over ~545× its TVL monthly and pays points for orders that never fill. Ostium was drained for ~$23.75 m via
+  forged oracle prices on 15 July 2026.</p>
+
+  <p><b>Where venues describe themselves wrongly.</b> Three of the twenty publish an architecture claim their own settlement
+  layer contradicts, and each favours the venue. <b>GRVT</b>'s docs say it "leverages zk-rollups" while it is a validium that
+  keeps transaction data offchain. <b>StandX</b> advertises "a fully onchain order book where every transaction, from order
+  placement to final trade, is processed directly on the blockchain," yet order entry is a JWT-authenticated REST call and no
+  matching contract appears in its audit scope. <b>Derive</b> says "Ethereum rollup" while L2BEAT declines to classify it as a
+  rollup at all — full data goes to Celestia with no verified DA bridge. <b>edgeX</b> is the subtlest: its EDGE Chain is an
+  Arbitrum Orbit L3 in AnyTrust mode behind a 2-of-5 committee, so it moved from one offchain-DA committee to another and was
+  never a rollup. When a venue's own docs and its DA layer disagree, the DA layer is the fact.</p>
+
+  <p class="meta" style="margin-top:18px">Every load-bearing claim above — the six speedbump regimes, the four disputed
+  architecture classifications, the Ostium and GMX incidents and the Derive matching split — was re-checked against primary
+  sources in a separate adversarial pass, which corrected five of them. Confidence is highest on documented mechanisms and
+  lowest on Antarctic, StandX and GMTrade, where the underlying documentation is thin or self-contradictory.</p>
+</footer>
+
+</div>
+
+<script>
+const D=[
+{rank:1,name:"Hyperliquid",oi:"$10.52 B",chain:"Hyperliquid L1",cls:"CLOB",eng:"Onchain CLOB",engT:"e-clob",
+ engS:"Fully onchain limit order book with price-time priority. HIP-2 'Hyperliquidity' places resting orders into the same book but is <b>spot only</b> — perps are pure CLOB.",
+ micro:"Price-time priority within the book, but ordering <i>into</i> the book is <b>not FCFS</b>. Consensus is order-book-aware and sorts each block into three buckets: non-taking/post-only → <b>cancels</b> → GTC/IOC aggressors, so cancels structurally beat takers. On top sits a <b>paid priority auction</b>: up to 8 bp on filled notional buys queue position (~45 ms/bp, measured on mainnet), plus separate Dutch auctions selling prioritised mempool-stream access (~25 ms/slot, burned in HYPE). Maker rebates to −0.003%. STP is expire-maker.",
+ arch:"<b>Fully onchain</b> — purpose-built L1, no offchain book, no rollup. HyperCore holds the book, clearinghouse and margin in L1 state; matching executes inside the block transition ordered by <b>HyperBFT</b> (HotStuff variant). API servers are non-consensus infrastructure. HyperEVM shares the same blocks. ~200 k orders/sec, execution-bound.",
+ lat:"200 ms", latT:"DOC", latSort:200,
+ lat2:"Co-located client, submit→committed; p99 900 ms <span class='tag t-doc'>DOC</span>. Block time <b>never disclosed</b>; est. 50–200 ms. Glassnode measures 884 ms median via the public REST path <span class='tag t-est'>EST</span>.",
+ notes:["<b>HLP</b> is the onchain backstop — the entire liquidation PnL stream accrues to it.",
+   "Two-tier stake-weighted oracle every 3 s across 8 CEXs, <b>deliberately excluding its own book</b>; funding uses oracle not mark, capped 4%/hr.",
+   "Liquidation in two phases; >100 k USDC positions close 20% at a time with a 30 s cooldown.",
+   "<b>HIP-3</b> lets a 500 k-HYPE deployer launch perp markets controlling oracle, leverage and spec — 'Hyperliquid microstructure' is no longer uniform across markets.",
+   "<span class='flag'>Docs contradict themselves</span>: the market-making page still claims no rebates or latency advantages; the fees and priority-fee pages document both."],
+ det:"Rate limits are the binding HFT constraint, not latency: 1 request per 1 USDC of cumulative volume with a 10,000 buffer, and docs recommend bypassing the API entirely by running a non-validating node (32+ cores, 128 GB RAM) and building the book locally. No whitepaper exists for Hyperliquid or HyperBFT — the GitBook is the primary source and carries no version or date."},
+
+{rank:2,name:"Aster",oi:"$2.00 B",chain:"Aster Chain · BNB/ETH/ARB/SOL",cls:"CLOB",eng:"Multi-mode hybrid",engT:"e-hyb",
+ engS:"Four products, three mechanisms. <b>Pro perps + Spot = CLOB.</b> <b>Shield Mode and 1001x = oracle-priced pool</b> with a closed-form slippage term drawn from aggregated Binance/Coinbase/OKX/Kraken depth refreshed every 5 s. Docs call Shield 'AMM-style' but there is no bonding curve.",
+ micro:"Price-time priority is <b>never stated</b> — inferred from 'updated orders re-enter the order book queue.' Post-only, GTC/IOC/FOK, chase, scaled, TWAP, three-mode STP. <b>Hidden orders</b> conceal size and presence but sit inside the main engine — Aster explicitly disclaims dark-pool status. Hidden-vs-displayed queue precedence at the same price is <b>unspecified</b>. MM rebates −0.25 to −0.5 bp, gated on ≤0.1% spreads, ≥0.5 s quote life and 70% daily uptime. No batch auction, no speedbump.",
+ arch:"<b>Hybrid, and the docs concede it</b>: 'key trading and account events are recorded onchain, while certain operations remain offchain.' Aster Chain is a privacy-focused <b>PoSA L1, not a zk-rollup</b> — ZK is used for encrypted orders plus stealth addresses. Mainnet genesis Mar 2026. Treasury contracts on BNB/Ethereum/Arbitrum/Solana appear to be custody-and-bridge only. 1001x is the exception: genuinely contract-callable onchain.",
+ lat:"~10–50 ms", latT:"EST", latSort:30,
+ lat2:"Order ack, intra-region <span class='tag t-est'>EST</span> — basis: Binance-lineage REST/WS engine, no colocation offered, MM rules tolerate sub-second churn. <b>50 ms block time</b> and 100 k TPS are published <span class='tag t-doc'>DOC</span> but are block-layer, and framed as targets.",
+ notes:["Yield-bearing collateral (asBNB, USDF) with per-chain haircuts — ASTER itself at 80%, LISTA/TWT at 10%.",
+   "At 500x–1001x there is <b>no opening fee</b>; a PnL profit-share replaces it (Shield takes 15–20% of profits). Breaks any bps-on-notional comparison.",
+   "<span class='flag'>Volume disputed.</span> DefiLlama delisted Aster perp volumes Oct 2025 after showing they tracked Binance's; relisted at Aster's request with 0xngmi warning it is 'still a black box and we can't verify the numbers.'",
+   "The privacy features that differentiate Aster are the same properties that make third-party volume verification impossible."],
+ det:"Fee pages disagree: trading/perpetuals.md advertises 0.01%/0.035% while the authoritative fees page states maker 0% / taker 0.04%. The Pro order-book docs still live under an /astherusex-orderbook-perp-guide/ path — an artifact of the APX Finance / Astherus merger — and list a narrower order-type set than the current docs."},
+
+{rank:3,name:"Variational",oi:"$1.27 B",chain:"Arbitrum One",cls:"RFQ",eng:"RFQ · single-dealer",engT:"e-rfq",
+ engS:"<b>No order book at all.</b> Takers request quotes; makers respond and hold a <b>last look</b>. On Omni the Omni Liquidity Provider is the <b>only eligible maker and the counterparty to every trade</b> — structurally a single-dealer principal market. Competitive multi-dealer RFQ exists only in Variational Pro, which is not live.",
+ micro:"No queue, no resting orders, therefore <b>no priority, no maker concept, no rebates</b>. Maker last look is documented, backed by 11 named risk checks including a mark-price deviation tolerance — the taker's accept is binding, the dealer's quote is not. No quote-validity window or reject-rate is published. 'Limit orders' are a <b>0.1 s polling trigger</b>, all-or-nothing, and docs concede sub-100 ms price touches can be missed. Zero trading fees; revenue is spread capture with 20% to treasury.",
+ arch:"<b>Hybrid.</b> Offchain: RFQ negotiation, oracle aggregation, margin/liquidation engine, settlement engine. Onchain (Arbitrum): <b>bilateral settlement pools</b> as escrow contracts, the OLP vault, oracle and treasury. Positions are peer-to-peer agreements, <b>not netted against a shared pool</b>, and pools are hard-isolated from one another. Gasless for users. Audited by Zellic and Spearbit.",
+ lat:"~100–500 ms", latT:"EST", latSort:300,
+ lat2:"Quote round-trip <span class='tag t-est'>EST</span> — basis: the 100 ms limit-order loop bounds internal quote refresh; API is region-pinned to Tokyo. Onchain booking ~1–5 s. <b>Nothing published.</b> In RFQ, speed confers no taker edge — the risk is rejection, not slowness.",
+ notes:["<b>Counterparty risk is 100% concentrated in OLP and unmutualised</b> — no shared insurance fund. Docs: 'the funds deposited into the pool are the only funds available.'",
+   "OI is not whale-driven — <i>every</i> position faces OLP by construction.",
+   "Portfolio margin explicitly aligned to Deribit's engine.",
+   "450–515+ markets including RWA and <b>pre-IPO perps</b>, permissionlessly listed — the RFQ design is what makes that tractable, since there is no book to bootstrap per market.",
+   "OLP vault is team-seeded and closed to user deposits."],
+ det:"Price discovery is fully exogenous — imported from CEX/DEX/TradFi venues via the Variational Oracle. Omni contributes none of its own. Fees are $0.10 flat per deposit/withdraw and a 0.5% liquidation penalty; ADL exists as OLP's last-resort self-protection."},
+
+{rank:4,name:"Lighter",oi:"$879 M",chain:"zkLighter · Robinhood Chain",cls:"CLOB",eng:"ZK-proven CLOB",engT:"e-clob",
+ engS:"CLOB where <b>price-time priority is a circuit constraint, not an operator promise</b>. Priority is encoded structurally in the Order Book Tree's leaf indexes using monotonic nonces instead of timestamps; auditors confirm matching is executed 'in a way that ensures no cheating in the matching algorithm.' A whitelisted <b>perpRFQ</b> overlay handles large size.",
+ micro:"FIFO sequencer and strict price-time priority — but wrapped in the table's <b>largest asymmetric speedbump</b>. Premium accounts: maker and cancel <b>0 ms</b>, taker on a staking ladder — <b>200 ms at 0 LIT, stepping 195 / 190 / 180 / 170 / 160 / 150 down to 140 ms at 500 k LIT</b>. Plus and Standard: maker 200 ms, taker 300 ms. Lighter frames this as policy: 'Lighter is designed to promote fair and robust market structure.' Effectively a 140–300 ms last-look window for makers. <b>No maker rebate</b> — the advantage is delivered as latency and rate limits. STP default moved to cancel-maker.",
+ arch:"<b>ZK rollup on Ethereum</b> — L2BEAT confirms rollup, not validium, with account state deltas posted onchain as blobs. Custom Plonky2 circuits, Poseidon2. Centralised sequencer; 14-day censorship window then 'desert mode' lets users reconstruct state from blobs and exit. <span class='flag'>Stage 0: contracts are instantly upgradable with no delay — L2BEAT rates this CRITICAL</span>, and it dominates the ZK guarantees in practice.",
+ lat:"140–300 ms", latT:"DOC", latSort:200,
+ lat2:"Policy taker delay, exact by tier <span class='tag t-doc'>DOC</span>. Base engine ack <b>not published</b>; ~1–10 ms <span class='tag t-est'>EST</span> — basis: a 0 ms tier is only a differentiator if the native path is fast, and colocation guidance names a specific AWS availability zone. Proofs ~2 min, state updates ~7 min.",
+ notes:["<b>Zero fees on Standard (0%/0%) are paid for in latency, not rebates</b> — a fee on adverse selection rather than on volume.",
+   "Matching is verifiable; <b>sequencing is trusted</b>. Fair ordering, encrypted mempools and pre-commitment are explicitly future work.",
+   "<b>LLP</b> is insurance fund and primary LP in one, now gated to LIT stakers at 10 USDC per 1 LIT staked.",
+   "Mark price is a median of three with a hard 0.5% premium cap; index from Chainlink, Stork and Pyth.",
+   "A separate instance runs on Robinhood Chain with USDG as quote asset, live 1 Jul 2026, 50/50 revenue split."],
+ det:"The rollup classification deserves a caveat: Lighter posts reduced data by design, enough for solvency and exit reconstruction but not for full order-flow replay. It clears the rollup bar for exit guarantees, not for independent audit of ordering."},
+
+{rank:5,name:"edgeX",oi:"$409 M",chain:"EDGE Chain (Arbitrum Orbit)",cls:"CLOB",eng:"Offchain CLOB",engT:"e-clob",
+ engS:"Self-described 'central limit order book (CLOB) model.' Matching runs offchain in a Go microservice cluster with prices streamed directly into engine memory. <span class='flag'>Price-time priority is not stated anywhere across all 51 doc pages</span> — a real gap for a venue marketing on execution quality.",
+ micro:"LIMIT / MARKET / STOP / TAKE_PROFIT variants; TIF GTC, FOK, IOC, POST_ONLY; reduce-only. Fees tier on 30-day volume with <b>no negative maker tier</b>. Documented absences, all verified across the full page index: <b>no self-trade prevention, no TWAP, no MM program, no published rate limits, no colocation offering.</b> The roadmap 'FlashLane' is a QoS split by <i>operation type</i> — order placement pre-empts deposits and governance — so it is fairness-neutral across traders, not a tiered-access product.",
+ arch:"<b>Three generations; conflating them is the trap.</b> V1 was a StarkEx <b>validium</b> on Ethereum with STARK proofs, a 2-of-6 DAC whose members are not publicly known, a single-EOA operator and 7-day forced exit. V2 moved <b>off StarkEx onto the Arbitrum stack</b> and swapped StarkKeys for EIP-712/secp256k1. EDGE Chain is now an <b>Arbitrum Orbit L3 — and it is AnyTrust, not a rollup</b>: L2BEAT types it 'Other' and finds that 'proof construction relies fully on data that is NOT published onchain,' behind a <b>2-of-5 DAC</b>. So edgeX moved from a 2-of-6 StarkEx committee to a 2-of-5 AnyTrust committee — <b>offchain DA throughout</b>, never a rollup.",
+ lat:"&lt;10 ms", latT:"MKTG", latSort:60,
+ lat2:"'Matching latency below 10 milliseconds' and '200,000 orders per second' appear on the product homepage <span class='tag t-mkt'>MKTG</span>. The technical docs instead say 20,000 TPS at 10 shards — an <b>unreconciled 10× discrepancy</b> with no methodology, percentiles or measurement point. End-to-end retail ~30–90 ms <span class='tag t-est'>EST</span>.",
+ notes:["Oracle is <b>first-party</b>: a Go microservice holding direct WebSocket connections to the top five CEXs, stake-weighted median with Binance weighted 3. This contradicts V1's older claim of 'independent oracle providers.'",
+   "<span class='flag'>No insurance fund, no ADL, and no partial-liquidation policy is documented</span> — for a 100x venue, there is no published answer to who absorbs bankrupt-position losses.",
+   "Isolated margin is achieved by spinning up to 20 sub-accounts per wallet, not a mode toggle.",
+   "edgeX pays users' gas for trade settlement.",
+   "The roadmap EDGE Stack replaces proofs with permissionless watcher-node replay — a <b>security regression</b> on state validation versus V1's STARKs."],
+ det:"Audited by Rigsec and SlowMist, with PeckShield's StarkEx v4.5 audit cited by reference for the V1 stack. MPC-account users can only withdraw to Arbitrum; wallet users can reach Ethereum, BNB Chain or Arbitrum, and Ethereum withdrawals can take up to 14 hours — which brackets the real L1 batch cadence."},
+
+{rank:6,name:"GRVT",oi:"$356 M",chain:"GRVT (zkSync ZK Stack)",cls:"CLOB",eng:"Offchain CLOB + RFQ",engT:"e-clob",
+ engS:"Offchain CLOB plus a genuine <b>RFQ / block-trade path</b> — confirmed in the API schema, not just marketing: 'RFQ Maker only supports (GTT, AON), RFQ Taker only supports (FOK)', where AON is flagged Block Trades Only. Multi-leg structures carried via a <code>legs</code> field.",
+ micro:"<b>Documented 25 ms taker speedbump on majors, 50 ms on alts</b>, stated verbatim in the API's <code>post_only</code> field and justified on the MM page as 'minimiz[ing] toxic flow' — post-only exemption is implicit in the field's 'If False' framing rather than stated outright, and the 50 ms alt figure appears <i>only</i> on the MM page. Either way it creates structural maker priority. Then a second, rarer mechanism: <b>RPI orders</b> are MM-quoted, post-only, matchable <i>only</i> by non-algorithmic UI users, excluded from the API book, market data, impact price and funding, and carry explicitly the <b>lowest execution priority</b> at equal price. So the queue has at least two classes and the public book is a strict subset of the matchable book. Maker rebates ≈ −1 to −3 bp across 9 tiers; Advanced Maker tiers unlock PrivateLink, RPI whitelisting and rate-limit increases. Colocation supported.",
+ arch:"zkSync ZK Stack in <b>validium mode</b> — L2BEAT types it Validium, 'with confidential data availability and transaction filtering enabled,' where 'transaction data is stored off-chain and only the hashes are posted onchain by the centralized Sequencer.' <span class='flag'>Note docs.grvt.io markets the opposite</span> — 'GRVT leverages zk-rollups' — which is wrong on DA. It was zkSync's first hyperchain. Offchain: matching, book, risk engine. Onchain: trade settlement, liquidation fairness validation, transfer validation, all behind ZK validity proofs to Ethereum. DA moved from a DAC to <b>EigenDA</b>. Self-custody via SecureKey + EIP-712 with session keys; <b>no escape hatch is documented</b>, and the backend is 'the only permissioned entity allowed to execute transactions against our L2 smart contracts.'",
+ lat:"≥25 / 50 ms", latT:"DOC", latSort:25,
+ lat2:"Effective taker floor, majors/alts <span class='tag t-doc'>DOC</span>. Matching itself is published at <b>&lt;2 ms</b> with 600 k TPS <span class='tag t-doc'>DOC</span> — but the speedbump dominates it by an order of magnitude, and only post-only makers see the 2 ms path. Onchain settlement is separately capped at ~200 TPS. No ack RTT, block time or finality figure published.",
+ notes:["<b>Bermuda BMA Class M licence</b> (Dec 2024) — marketed as the world's first regulated DEX, with intent to upgrade to full Class F.",
+   "Privacy is <b>post-trade positional confidentiality, not pre-trade book opacity</b> — it hides margin balances and liquidation levels, precisely the data hunted on transparent perp DEXs.",
+   "MEV is structurally absent (no public mempool, no third-party builder) but is <b>replaced by operator trust</b> — users cannot independently audit ordering fairness.",
+   "Insurance fund absorbs distressed accounts by taking transfer of their balances and positions, then closing them.",
+   "<span class='flag'>KYC status unresolved</span>: third parties consistently report mandatory KYC was dropped ~Aug 2025, but every primary GRVT source for it now 404s or 401s."],
+ det:"Mark price is a median of three: oracle plus a 150 s EMA capped at 5% variance, GRVT's own fair price, and Block Scholes' CEX-weighted perpetual mark. Write rate limits are flat across all nine tiers — throughput privilege is only obtainable via Diamond MM status, not purchasable."},
+
+{rank:7,name:"Antarctic",oi:"$261 M",chain:"Arbitrum (+ ETH, BNB)",cls:"CLOB",eng:"Offchain CLOB + house vault",engT:"e-hyb",
+ engS:"An order book — fee docs define maker/taker in strict CLOB terms and the roadmap lists 'On-chain ZK Order-book Development.' But dominant liquidity is a <b>protocol-operated market-making vault (AMLP)</b> hedged by a second vault (AHLP), and the FAQ concedes AMLP 'profits when traders lose.' The book is real; the house is on the other side of much of it.",
+ micro:"<span class='flag'>Almost entirely undocumented — and that is the finding.</span> No priority algorithm, no order-type enumeration, no post-only/IOC/FOK, no batch auction, no speedbump, no MM program, and <b>no negative maker rebate</b> (VIP5 floors at 0.0000%). What <i>is</i> documented is CEX-style discretionary surveillance: wash trading, self-matching, multi-accounting and 'malicious hedging' are prohibited, with enforcement up to freezing funds and terminating accounts. ADL displayed in 20% increments.",
+ arch:"Hybrid — offchain book and matching, with trades batched into zk-SNARK validity proofs and only state roots committed onchain; individual transactions stay off. Chains: Arbitrum (mainnet, ~all TVL), Ethereum, BNB. <b>zk stack, prover, sequencer, DA layer, contract addresses and audit reports are all undisclosed.</b> DefiLlama's 'Off Chain' tag means volume comes from Antarctic's own API, not onchain events — consistent with the design. Custody is claimed self-custodial but pairs Web2 email login with a 20,000 USDT / 24 h transfer cap, freeze rights and no escape hatch.",
+ lat:"N/D", latT:"N/D", latSort:9000,
+ lat2:"<b>No figure exists</b> in docs, site, press or third-party coverage — only 'lightning-fast' and 'CEX-grade.' ~10–100 ms ack, ~1–10 min proof finality <span class='tag t-est'>EST</span>, low confidence — basis: a single offchain engine with no consensus in the hot path, built for arbitrage traders.",
+ notes:["Docs are a marketing litepaper, not an engineering spec: <b>no protocol spec, no API reference, no contract addresses, no published audit.</b> API access is a 2026 Q1–Q2 roadmap item.",
+   "Points rate is self-contradictory — 1 point per $1 in the litepaper versus 1 point per $100 (1,000/day cap) in the mainnet press release.",
+   "<b>Backers are unnamed everywhere</b> despite a claimed $7 M seed; CEO given only as 'Kai'; jurisdiction listed as Panama by CoinGecko and Singapore by TradingView.",
+   "Unusual ratios: OI ≈ 27× TVL, but daily turnover is <b>below 1× of OI</b> — the opposite of the classic wash-trading signature. Both merit scrutiny; neither is evidence.",
+   "Team takes 40% of trading fees. ATTX TGE unannounced."],
+ det:"No credible third-party analysis of volume quality exists in either direction. CoinGecko's State of Crypto Perpetuals Report 2026 does not mention Antarctic at all, and it is absent from the major perp-DEX comparison pieces, while perps.info tags it 'Farming.'"},
+
+{rank:8,name:"GMTrade",oi:"$202 M",chain:"Solana",cls:"Pool",eng:"Oracle-priced pool",engT:"e-pool",
+ engS:"<b>GMX V2 ported to Solana</b> — the GitHub org's main repo is literally <code>gmx-solana</code>. No book, no RFQ, no matching of any kind. Traders transact against per-market <b>GM pools</b> and <b>GLV meta-vaults</b>; LPs are the explicit counterparty. Price is Chainlink Data Streams oracle mid adjusted by skew-based price impact. <i>Unrelated to GMGN.ai.</i>",
+ micro:"No book, so no priority, no post-only, no maker/taker. Execution is <b>two-step and keeper-driven</b>: the user creates a request onchain, then a keeper posts prices and executes. <span class='flag'>Ordering is keeper-discretionary and not warranted</span> — the repo's known issues admit keepers can use prices from different timestamps, and the bug bounty <b>explicitly excludes timing and ordering exploits from rewards</b>. The maker-rebate analogue is skew-based fee tiering: 0.4 bp or 0.6 bp on FX, 1.0 or 1.2 bp elsewhere, with the lower rate when your trade improves long/short equilibrium. Excess price impact becomes claimable after ~10 days. Orders can enter a 'frozen' state — an unbounded documented deferral.",
+ arch:"<b>Onchain Solana Anchor programs</b> (gmsol-store, treasury, timelock, competition, LP — all with published mainnet addresses and public audits from Jan 2026) plus <b>offchain keepers acting as trigger and price relay, not as a matching engine</b>. All economically consequential state — positions, collateral, pool accounting, funding, liquidations — settles onchain. Fully open source, unusually so for this cohort. Chaos Labs supplies utilisation-based GLV rebalancing.",
+ lat:"~1–3 s", latT:"EST", latSort:2000,
+ lat2:"No figure published <span class='tag t-nd'>N/D</span>. <b>~0.8 s hard floor</b> — the documented flow needs two transactions in two Solana slots at ~400 ms — then keeper RPC polling, Data Streams fetch and transaction landing push it into the low seconds <span class='tag t-est'>EST</span>. The quoted price is not the price you get; fill is struck at keeper-execution time.",
+ notes:["<b>500× intraday leverage on RWAs, dynamically cut when the underlying TradFi market closes</b>, with borrowing fees raised to compensate LPs overnight — most crypto perp venues have no concept of a closed session.",
+   "Headline fees are extremely low (0.4–1.2 bp) and fully redistributed: 75% LPs, 15% treasury, 10% development.",
+   "<b>GT points are minted by <i>paying fees</i></b>, at a mint cost rising 2.1% every 210,000 GT on a deliberately Bitcoin-like curve. Treat volume as materially incentive-inflated.",
+   "GMX is the largest GT holder; GMX Solana was funded ~$0.8 M via a GMX Labs proposal. Alignment, not a licence or a plain fork.",
+   "<span class='flag'>OI reads $58 m to $279 m depending on the DefiLlama endpoint</span>; CoinGecko says ~$298 m. Cross-check before relying on any single figure."],
+ det:"Priority fees on Solana affect only the request leg's inclusion — because fill price is set at keeper execution using keeper-supplied oracle prices, priority fees cannot buy a better fill. Per-pool max leverage also falls as pool OI rises, to guard against gaming price impact with high-leverage positions."},
+
+{rank:9,name:"Extended",oi:"$182 M",chain:"Starknet · Ethereum",cls:"CLOB",eng:"Offchain CLOB + RFQ",engT:"e-clob",
+ engS:"Hybrid CLOB — 'order processing, matching, position risk assessment, and transaction sequencing are handled off-chain' with settlement on Starknet. Separately runs <b>RFQ markets</b> for crypto and RWAs where market makers pick up user orders; market orders there never rest and are cancelled if unfilled. Price-time priority is <b>not documented</b>. Formerly X10.",
+ micro:"Market, Limit, Conditional, <b>TWAP</b> (with ±20% randomisation), Scaled; GTC/IOC/FOK; Post-Only, Reduce-Only, OCO TPSL; mass cancel and a dead-man's switch. STP on by default, cancelling the resting order — but scoped <b>per trading account</b>, and users may hold ten accounts per wallet. Maker 0.000% / taker 0.025% flat with <b>no taker tiers at all</b>; maker rebates to 0.013% keyed on <b>30-day market share, not volume</b>, which concentrates incentives in a few large MMs per market. The distinctive part is that fairness is enforced <b>onchain</b>: a full health check on every collateral-moving transaction, trades that cannot settle worse than your limit price, onchain caps on max funding rate, and liquidations that must improve your value-to-risk ratio or be rejected.",
+ arch:"Offchain Extended-run sequencer → <b>Starknet, which is a true validity rollup with state diffs posted to Ethereum blobs — not a validium</b>. The StarkEx→Starknet move is widely reported but <b>current docs never mention StarkEx at all</b>; the heritage is circumstantial (the <code>x10xchange</code> GitHub org, an SDK <code>starknet</code> branch shipping a MIGRATION.md). It matters because <span class='flag'>no forced-withdrawal or escape hatch is documented anywhere in the current docs</span> — verified across the full page index, technical-architecture, deposits-and-withdrawals and platform-outage. Starknet's own sequencer is run by StarkWare with no forced inclusion; L2BEAT rates Stage 1, state updates ~43 min. Deposits and withdrawals span six EVM chains via Rhino.fi.",
+ lat:"~5–25 ms", latT:"EST", latSort:15,
+ lat2:"Colocated in AWS ap-northeast-1a, which the docs explicitly recommend <span class='tag t-est'>EST</span>. <b>~180–320 ms for retail from US/EU</b> — the engine is single-region Tokyo, so geography, not engine speed, is the binding constraint. Extended publishes <b>no number</b>: its 'Latency benchmarks' figure lives only in an image whose asset 404s. Starknet confirms ~2 s; L1 root ~43 min.",
+ notes:["Unified margin plus a <b>native money market</b> — negative USDC backed by non-stables borrows at a curve rate, while XVS-backed negative balances are interest-free.",
+   "Partial liquidations in up to five stages of 20%, then ADL if the position cannot clear within 5% of bankruptcy price.",
+   "The Extended Vault takes a 1% liquidation fee but is explicitly <b>not a last-resort backstop</b> — capped at 2.5% of the fund per 24 h and $100 k max loss per trade. A capped insurance fund, not an HLP-style backstop.",
+   "Oracle is a <b>single provider</b> — five Stork nodes — a concentration risk given liquidation impartiality is justified by reference to it.",
+   "RWA, pre-IPO and pre-market listings with corporate-actions handling; several run as RFQ rather than CLOB. Ex-Revolut team, no token yet."],
+ det:"Isolated margin and hedge mode are emulated with up to ten separate trading accounts per wallet, since one account cannot hold simultaneous long and short in the same market. The legacy x10.exchange architecture page is stale on the stack but remains the better source for the CLOB-versus-AMM design rationale."},
+
+{rank:10,name:"ApeX Protocol",oi:"$119 M",chain:"zkLink X · ETH/BNB/Base/Mantle/ARB",cls:"CLOB",eng:"Offchain CLOB",engT:"e-clob",
+ engS:"ApeX Omni runs 'a central limit order book that aggregates liquidity from multiple sources.' Three generations: v1 was an elastic AMM (superseded), <b>ApeX Pro was a StarkEx CLOB and is fully sunset</b> — delisted Mar–Apr 2025, forced withdrawals from Jul 2025, archived by L2BEAT. Any StarkEx-era description of ApeX is stale. Price-time priority is not documented.",
+ micro:"LIMIT / MARKET / STOP / TAKE_PROFIT variants; TIF GTC, FOK, IOC, <b>POST_ONLY</b>; reduceOnly, triggerPrice, position TP/SL. 200 open orders per account, 600 requests/60 s. Fees taker 5 bp / maker 2 bp, with the VIP program reaching 0% taker and a <b>−0.5 bp negative maker fee</b>. The quirk: VIP tiers can be reached by <b>staking APEX <i>or</i> by volume</b>, so a passive staker can buy their way to zero fees without trading. Dedicated Gnosis Safe multi-sig endpoints make institutional MM onboarding first-class. <b>No STP documented, no batch auction, no speedbump</b> — and zkLink itself concedes its centralised sequencing carries censorship and MEV risk.",
+ arch:"Offchain matching on the <b>zkLink X app-rollup</b> (a trading-specific zkVM). Two-layer signing — HMAC API key plus a zkLink L2 signature on the exact trade parameters — so users cryptographically authorise their own fills and the operator cannot fabricate trades. Collateral is <b>not bridged</b>: funds lock in zkLink contracts on five chains, reconciled by sync hashes and a light oracle network. Forced exit via <code>requestFullExit</code> into a priority queue, escalating to <b>Exodus Mode</b> after 3–5 days. <span class='flag'>Omni's DA choice, host chain and contract addresses are not published</span> — so rollup versus validium cannot be determined.",
+ lat:"~50–150 ms", latT:"EST", latSort:100,
+ lat2:"Matching and ack are <b>undisclosed</b> <span class='tag t-nd'>N/D</span>. Published TPS figures conflict — 3,000 in the zkLink post and official launch PR versus 10,000 in ApeX's own comparison blog, unreconciled, and both are settlement-layer not matching. ~1–10 ms in-engine, 50–150 ms retail RTT <span class='tag t-est'>EST</span> — basis: limits framed per-60-seconds (~10 req/s sustained), an order of magnitude below HFT-grade, so latency is not a marketed differentiator.",
+ notes:["<span class='flag'>Correction to a common claim</span>: ApeX was incubated by <b>Davion Labs</b> with a Dragonfly-led seed. Bybit's roles are Launchpad 2.0 hosting and a wallet integration — <b>no shared order book, liquidity or matching engine</b>. Mirana, an investor, is Bybit's affiliated arm.",
+   "Three trust models inside one account: crypto index from spot CEXs, stock perps on <b>Chainlink RWA feeds</b> constrained to US market hours, and prediction perps indexed directly to Polymarket (delisted Jun 2026).",
+   "ADL is live and rank-ordered (the API returns a <code>lightNumbers</code> ADL ranking), but <b>no insurance fund, risk reserve or socialised-loss backstop is documented anywhere</b> — a material gap at 100x.",
+   "Unified cross-collateral across 8 tokens that <b>preserves each deposit's native identity</b>, unlike Pro which auto-converted via 1inch. Trading is gasless.",
+   "An 'ApeX Trading Chain' (DPoS, 1 M TPS, sub-100 ms targets) was announced for 2026 — no evidence it has launched; orders still sign with zkLink keys."],
+ det:"The product documentation site is blocked by robots.txt, so the gaps flagged here — STP, matching priority, insurance fund, DA choice — may be covered there. Everything above comes from the machine-readable API docs, ApeX's blog and litepapers, zkLink's docs and L2BEAT."},
+
+{rank:11,name:"Pacifica",oi:"$105 M",chain:"Solana",cls:"CLOB",eng:"Offchain CLOB",engT:"e-clob",
+ engS:"A genuine order book — aggregated depth endpoints, BBO channel, and post-only semantics that only make sense on a real CLOB. Matching is offchain (never explicitly stated, but order entry is Ed25519-signed JSON over REST/WebSocket, not Solana transactions, and the taker delay was retuned server-side within three days). Price-time priority is <b>not documented</b>.",
+ micro:"<b>A ~200 ms taker speedbump, documented verbatim</b>: 'In order to protect liquidity providers from adverse selection, all market orders are subject to a ~200ms delay,' extended to GTC and IOC. The changelog dates it precisely — introduced 9 Nov 2025 as a randomised 50–100 ms delay, <b>raised to ~200 ms three days later</b>, then refined on 19 Nov so it applies conditionally per batch — only if the batch contains market orders or GTC/IOC limits. ALO and TOB post-only orders are exempt, so makers quote and cancel with no imposed delay while takers eat 200 ms. TOB is unusual: a post-only variant that reprices to the best bid/ask instead of rejecting. <b>No FOK, no TWAP, no scaled orders, no trailing stops.</b> STP cancels the resting order, per-account. Maker floors at 0.000%; MM program grants zero maker fills plus <b>12% of all fees collected from MM counterparties</b>. Cancels cost half a rate-limit credit.",
+ arch:"Hybrid — offchain engine with Solana custody split hot/cold, the cold vault behind a <b>Squads multisig governed by a geo-distributed council</b>. <span class='flag'>Withdrawal is an offchain signed API request returning a batch nonce — operator-mediated, with no escape hatch documented anywhere.</span> This is custodial-with-governance rather than self-custody. The own-L1 plan is unresolved: the roadmap page describing a Substrate chain <b>has been removed from the docs and 404s</b>, and is absent from the current 161-page index; third parties report a devnet. Solana-settled as of Jul 2026. BlockSec audit.",
+ lat:"~200 ms", latT:"DOC", latSort:200,
+ lat2:"Effective taker ack = the documented ~200 ms delay plus network RTT <span class='tag t-doc'>DOC</span>; makers see RTT plus low single-digit ms. No engine figure is published. <b>Do not use the 'sub-10 ms' figure</b> circulating in third-party posts — unsourced, and the same articles contradict the documented fee schedule. Solana's ~400 ms slot does <b>not</b> gate trades here.",
+ notes:["Engineered as a <b>maker-favourable, taker-taxed venue</b> — the opposite of a latency-race CLOB. Expect quoted spreads to look tighter than a taker can realise.",
+   "Oracle is a weighted average of Binance (2), OKX, Bybit and Hyperliquid, refreshed every 3 s; mark is a median of three.",
+   "Three-tier liquidation → backstop liquidator → ADL, but <span class='flag'>the backstop liquidator refuses exotic markets — GOLD, NVDA, TSLA, URNM and others go straight to ADL</span>. Real tail risk for RWA/equity perp longs.",
+   "<b>No insurance fund exists.</b> Vaults are user-deployed manager pools, not a protocol backstop. There is a native USDC money market alongside.",
+   "<b>Self-funded — 'we haven't raised external capital.'</b> Team ex-Binance, FTX, Coinbase, Jane Street. 10 M points weekly, so discount headline volume. No token."],
+ det:"Book WebSocket cadence was raised from 500 ms to 100 ms as a configuration change in Oct 2025 — another signal the engine is offchain and far faster than its publication interval. No evidence was found of any Pacifica-specific exploit; searches surfaced only the market-wide Oct 2025 flash crash."},
+
+{rank:12,name:"Derive",oi:"$94 M",chain:"Derive Chain (OP Stack)",cls:"CLOB",eng:"Offchain CLOB + RFQ",engT:"e-clob",
+ engS:"'A centralized limit order book, but remains self-custodial, and settles trades and liquidations in a trustless manner,' plus a full multi-leg <b>RFQ</b> system where the taker's max cost and preferred direction are deliberately <b>hidden from the quoting market makers</b>. Options-first; perps are the complement. <i>Formerly Lyra — Lyra V1 was an AMM, do not conflate.</i>",
+ micro:"The detail most comparisons miss: <b>matching priority differs by product.</b> Perps use strict FIFO price-time. <b>Options use a blended three-pass algorithm</b> — a FIFO pass, then a pro-rata pass allocating by order size, then a FIFO cleanup for rounding. Published parameters: <code>pro_rata_fraction</code> 0.8, <code>fifo_min_allocation</code> 10 (ETH) / 1 (BTC). Time priority is deliberately diluted in favour of quoting size across the strike surface. Order types limit/market; GTC, post_only, FOK, IOC; reduce_only; mark- or index-triggered stops; TWAP. Every order individually signed with nonce, expiry and max fee. Price banding on both book and RFQ. MM Protections enforce per-currency delta limits in the engine, and <code>mmp=true</code> orders cost <b>3× less rate limit</b>. The real MM tier is throughput: retail 1 TPS matching against <b>500+ TPS for market makers</b>. Fees: perps maker <b>+1 bp — positive, no rebate</b>. STP not documented.",
+ arch:"Offchain matching (Derive Trading Co.) + onchain settlement on Derive Chain, an OP Stack L2 with a permissioned deployer whitelist. <span class='flag'>L2BEAT declines to classify it as a rollup at all — its type is literally 'Other'</span>, because full data goes to <b>Celestia</b> with no data-availability bridge and 'sequencer tx roots are not checked against the Blobstream bridge data roots onchain,' so the sequencer can publish unavailable roots. Derive's own docs still say 'Ethereum rollup' — a real discrepancy. Not even Stage 0; contracts instantly upgradable. Subaccounts are ERC-721 NFTs; a Security Module covers insolvent debt. Two escape paths: a 30-minute exchange-level exit, and a ~10.5-day chain-level forced exit.",
+ lat:"~1–20 ms", latT:"EST", latSort:12,
+ lat2:"In-engine <span class='tag t-est'>EST</span> — basis: the MM tier sustains 500+ TPS matching requests with 5× burst, which requires an in-memory engine. <b>Nothing published</b>; the rate-limits page contains no timing data. Block time est. 2 s (OP Stack default). Cadence is documented: tx data → Celestia ~21 min, state roots → Ethereum ~12 h, challenge period 3d 12h.",
+ notes:["<b>Options-first, and it explains the OI.</b> As of Mar 2026: OI split options 61% / perps 39%, volume 68% / 32%. Options OI is structurally sticky — multi-leg structures held to expiry, including a single >$130 M BTC structure — while perp OI turns over constantly.",
+   "Portfolio margin is the moat and it runs <b>onchain</b>: 23 Black76 scenarios, ±18% spot crossed with ±13.5% vol, netting options and perps — but <b>only within one underlying</b>. No cross-underlying netting, so traders shard subaccounts.",
+   "Oracle from <b>Block Scholes</b>, and each of the five feeds carries a <b>0–1 confidence score</b> that mechanically raises margin as it degrades rather than halting the venue.",
+   "Perp funding is <b>continuous, not periodic</b> — it settles whenever a position is touched, with the rate derived from impact bid/ask on a standardised 4,000 notional sweep, capped ±0.057%/hr on ETH and BTC.",
+   "The Lyra→Derive rebrand leaves heavy residue: the chain page still sits at <code>/docs/lyra-chain</code>, RPC and explorer are still <code>lyra.finance</code>."],
+ det:"Delta-1 basis vaults let LST/LRT holders lever to 2× on spot and short perps to harvest funding while staying delta-neutral, auto-unwinding when funding drops below borrow cost. Options are European, any strike and expiry with a supporting feed, max 400 days, settled on a 30-minute TWAP sampled once per minute."},
+
+{rank:13,name:"Vest Markets",oi:"$75 M",chain:"Base",cls:"Other",eng:"Risk-priced AMM · taker-only",engT:"e-hyb",
+ engS:"<b>The most unusual engine in the table.</b> No book, no maker side, no bonding curve: 'Instead of supporting maker-taker dynamics, Vest routes all trades through its internal AMM, making it a <b>taker-only system by design</b>.' Price = depth-weighted-median index across Binance/OKX/Bybit, <b>± a risk premium set so that system-wide risk is invariant before and after the trade</b>, measured in Entropic Value-at-Risk. The VLP pool is always the counterparty.",
+ micro:"No queue, no priority, no maker concept, and <b>no maker/taker fee asymmetry</b> — flat 1 bp both sides. Docs state plainly: 'There are no special programs, rebates, or access for market makers.' Slippage is a function of your <b>marginal contribution to system EVaR</b>, not of depth, so a trade that offsets the pool's existing exposure can execute <i>better</i> than index — impossible in a depth-based AMM. The premium curve and its parameters are <b>not published</b>, so price impact is not reproducible from public docs. Market and limit orders only; GTC/FOK; reduce-only, TP, SL. Ordering policy is undocumented and, importantly, <b>not covered by the ZK proofs</b>. Liquidations are partial and optimisation-driven with <b>zero liquidation penalty</b>; no ADL, socialised losses, insurance fund or OI caps.",
+ arch:"Hybrid — offchain execution queue and risk engine, onchain balances, positions and risk proofs on <b>Base</b>. <span class='flag'>There is no Vest appchain</span> — checked across both doc surfaces and third-party research; Vest launched on Arbitrum in Jan 2023 and now runs on Base. zkSNARKs prove premia, funding, solvency and liquidation optimality; <b>ordering and matching are not proven</b>. <b>A single validator</b> verifies proofs and state transitions, so the operator is trusted for liveness, ordering and censorship. Privy custody, no KYC, USDC-only, EIP-712 order signing. OtterSec audit.",
+ lat:"~500 ms", latT:"DOC", latSort:500,
+ lat2:"<b>API submission → order execution, published</b> <span class='tag t-doc'>DOC</span>; end-to-end frontend→protocol ~1 s, throughput 1,000 orders/sec. Effective quote staleness ≤1 s <span class='tag t-est'>EST</span> — basis: the risk engine recomputes EVaR at ~1 Hz. This puts Vest roughly an order of magnitude behind CLOB venues that publish sub-100 ms acks.",
+ notes:["Risk-indifference pricing is the thesis. Funding is likewise derived from each market's contribution to system risk via <b>Euler allocation</b>, proven correct in zkSNARKs — fees and funding are endogenous to solvency risk, not a fixed schedule.",
+   "LP payoff is modelled as a <b>short call spread</b> with capped, well-defined tail losses, and explicitly non-adversarial: 'LPs do not profit from aggregate trader losses' — a deliberate contrast with GMX-style pools.",
+   "<span class='flag'>Material documentation inconsistency</span>: legacy docs describe the EVaR/Euler funding above; the current Vest Markets docs give a conventional Binance-style clamped-premium formula and define mark as last traded price. The shipped product may be more conventional than the zkRisk literature implies.",
+   "<b>Jane Street confirmed as a backer</b> (2023 seed with QCP and Big Brain); a further $5 M seed in Mar 2025 for a 'Universal Risk Engine.'",
+   "Hard pivot to 24/7 tokenized-equity perps plus <b>Vest Capital</b>, a prop-firm-style funded-account program with profit share to 90% — a genuinely distinctive business model for a perp DEX. No token."],
+ det:"Vest is fundamentally oracle-anchored, not oracle-free — a common misreading. The API does expose a 100-level /depth endpoint, but this is very likely a synthetic ladder derived from the premium curve for CEX-API compatibility rather than a real matched book; the docs do not say which."},
+
+{rank:14,name:"Jupiter",oi:"$72 M",chain:"Solana",cls:"Pool",eng:"Oracle-priced pool (JLP)",engT:"e-pool",
+ engS:"The canonical Solana pool design. No book: 'The protocol executes trades at these oracle prices, eliminating traditional orderbook slippage.' Counterparty is the <b>JLP pool</b> — when traders profit the pool pays out. <b>Zero price impact by construction</b>, replaced by an explicit price-impact <i>fee</i> that scales with size and rises further when long/short OI imbalance crosses a threshold.",
+ micro:"No book, therefore no priority, no maker/taker split, no rebates — a single symmetric 0.06% open/close fee. Execution is a <b>two-transaction request→fulfil flow</b> with the request stored onchain as a PDA and <b>two Jupiter-run keepers racing in parallel</b> (users see the losing keeper's failed transactions in their wallet). <b>Ordering is Solana's, and the docs say so</b>: 'whichever is processed first by Solana will execute' — slot and leader inclusion, not an exchange-side FCFS queue. Priority fees affect only <i>request</i> inclusion; they cannot buy price improvement, because there is no depth and the trader does not control the fulfilment transaction. Protection is a price band, not a limit level. Limit orders cap at 20 per pair per side and <b>cannot be created above 80% market utilisation</b>; max 6 positions, and same-side positions merge.",
+ arch:"<b>Fully onchain settlement and state</b> — Solana Perpetuals program holding Pool, Custody, Position and PositionRequest accounts — with offchain keepers acting purely as submitters; every parameter is re-validated onchain. Oracle is <b>Edge by Chaos Labs</b> (formerly 'Doves'), with Chainlink and Pyth for verification and fallback; if two or more oracles fail, no price update occurs. Cadence is <b>event-driven, not a fixed interval</b> — the keeper writes the price and fills in the same transaction, so price age at fill is effectively zero.",
+ lat:"~1–2 s", latT:"EST", latSort:1500,
+ lat2:"No figure published — docs say only 'a short delay' <span class='tag t-nd'>N/D</span>. ~0.8 s floor from two sequential confirmed transactions at ~400 ms slots, plus keeper observe-build-send; 2–5 s under congestion <span class='tag t-est'>EST</span>. Latency here is <b>slot-quantised</b>: the real risk is oracle drift between request and fill, which is exactly what the slippage parameter bounds.",
+ notes:["JLP is both the counterparty and a packaged yield product — <b>75% of all fees are reinvested into the pool</b>, Jupiter keeps 25%.",
+   "<b>No funding rate.</b> An hourly borrow fee on pool utilisation replaces it, and it is one-directional — 'traders consistently pay borrow fees; they never receive funding payments.' Liquidation price therefore drifts toward spot with zero price movement.",
+   "<b>OI is capped by pool utilisation</b> because profits must be pre-reserved (locked assets, guaranteed USD, global size caps, $2.5 M max position). OI scales with AUM, not with quoted depth — the structural ceiling of the design.",
+   "Liquidation is total: all remaining collateral transfers to JLP, nothing returned.",
+   "Max leverage 250× in current docs against a 500× protocol constant; the legacy Station page still advertises 500× — treat docs.jup.ag as current."],
+ det:"Longs are collateralised in the traded asset while shorts are always collateralised in USDC, with the USD value of collateral fixed at deposit. Swap fees adjust by whether flow moves a custody toward or away from its target weight — the same weighting math that governs JLP mint and burn."},
+
+{rank:15,name:"StandX",oi:"$72 M",chain:"BNB Chain · Solana",cls:"CLOB",eng:"Offchain CLOB",engT:"e-clob",
+ engS:"A CLOB — the docs name it directly when describing Block Trade as 'completely isolated from the central limit orderbook (CLOB).' <span class='flag'>But the docs contradict themselves</span>: the marketing page claims 'a fully onchain order book where every transaction, from order placement to final trade, is processed directly on the blockchain,' while the API documents a JWT-authenticated REST/WebSocket exchange with no onchain order transaction. Read the onchain claim as marketing. A separate <b>Block Trade</b> venue is maker-posted and taker-accepted across ≤25 counterparties — not classic RFQ.",
+ micro:"Order types limit and market only. TIF is exactly three values: gtc, ioc and <b>alo</b> (Add-Liquidity-Only, StandX's post-only, rejectable at matching). No FOK. Base maker 1.0 bp / taker 4.0 bp, with real rebates via Community Maker Yield — <b>−0.25 bp at MM1, −0.50 bp at MM2</b> — requiring two-sided quotes within 10 bp of mark sustained ≥30 min per hour, weighted 40% at the band edge up to 200% at the mark. Separately, <b>Maker Points pay for resting orders even if they never fill</b>, weighted by value × duration × distance from mark with a 3-second minimum rest. <span class='flag'>Price-time priority and self-trade prevention are not documented at all.</span> No batch auction, no speedbump.",
+ arch:"<b>There is no StandX chain</b> — the docs state it 'does not operate its own blockchain'; DefiLlama's 'StandX' chain label is a canonical-bridge TVL bucket. BNB Chain (~81% of TVL) plus Solana. Audited contracts are 'StandX DUSD' and 'StandX Highway' — <b>no matching or orderbook contract is in audit scope</b>, itself evidence the book is not onchain. Withdrawal creates an onchain 'Withdrawal Slot' then relies on 'automated processing by StandX monitoring systems' — operator-mediated, no SLA, no escape hatch. <b>DUSD is the quote asset, not merely collateral</b>: pricing, margin, PnL, fee routing, vaults and liquidation all denominate in it.",
+ lat:"N/D", latT:"N/D", latSort:9000,
+ lat2:"<b>Nothing published</b> — no ack latency, tick rate, throughput or colocation disclosure. Do not mistake the 10-second WebSocket keepalive or the 3-second maker-points rest minimum for latency. ~10–50 ms colocated, ~50–250 ms retail <span class='tag t-est'>EST</span> — basis: a CEX-style engine behind a single hostname, ex-Binance Futures team, and 800 BTC quoted inside 10 bp requires sub-100 ms MM cancels.",
+ notes:["<b>DUSD is the whole thesis</b> — an Ethena-style synthetic dollar held to peg by delta-neutral short perp hedges, yielding from staking rewards plus funding, distributed daily with no staking action. Making it the <i>denomination</i> of the system rather than an optional collateral is the distinctive choice.",
+   "<span class='flag'>The structural consequence the docs do not discuss</span>: trader collateral inherits DUSD's hedge and custodian risk, the hedge legs sit on unnamed 'off-chain platforms' (almost certainly CEXs), and the venue's funding revenue correlates with DUSD's funding yield.",
+   "<b>~$17.8 B of 30-day volume against $32.6 M TVL — roughly 545× monthly turnover across ~11 markets</b>, with every axis points-rewarded pre-token and points paid for unfilled orders. Treat headline volume as heavily farm-driven.",
+   "Leverage is notional-tiered (40× under $1 M, down to 5× above $100 M); markets include gold, silver, crude, equity perps and pre-IPO SpaceX.",
+   "<b>Fully self-funded</b>, fewer than 10 people, principals identified only by initials — ex-CME, ex-Binance Futures, ex-Goldman. Mainnet 23 Nov 2025. No token."],
+ det:"Mark price is a median of three inputs — a funding-adjusted oracle index, a short-term basis term from recent StandX mid-price deviations, and the latest StandX trade — cross-checked against Binance, OKX and Bybit and temporarily pinned to their median on significant divergence."},
+
+{rank:16,name:"Ondo Perps",oi:"$69 M",chain:"Ethereum (settlement)",cls:"CLOB",eng:"Offchain CLOB in SGX enclave",engT:"e-clob",
+ engS:"Offchain CLOB with continuous matching running <b>inside an Intel SGX enclave</b> — 'encrypted at runtime and invisible to the host OS, cloud provider, and Ondo Perps operators.' Settlement onchain. Mark price is oracle-derived, but <b>inverts on weekends</b>: when external markets close, the oracle switches to an internal price built from Ondo's own book, making the venue a genuine price-discovery site during closed hours. Price-time priority not stated.",
+ micro:"Market and limit; GTC/IOC; postOnly, reduceOnly; OCO TP/SL on mark; native <b>TWAP</b> with its own endpoint family; batched create and cancel; a <b>dead-man's switch</b>; API-key IP whitelisting; 'priority cancels.' Maker 1 bp / taker 2.5 bp promotional (docs disagree — markets.md says 1.5/3.5). <b>No negative maker rebate and no formal MM program.</b> No taker speedbump; the only throttle is liquidation, at ~10% of the position every 5 seconds above $1,000 notional. The <b>market-hours machinery is the most developed in this table</b>: mark updates clamped to ~50 bp per cycle to control the Sunday gap, discovery bounds of Friday close × (1 ± 1/max_leverage) beyond which orders are rejected, positions outside active bounds unliquidatable on price alone, funding dampened 0.5× in extended sessions, and a 2.5% closed-market settlement fee. <span class='flag'>Corporate actions — dividends and splits — are explicitly roadmap, not handled</span>, which the launch blog itself criticises incumbents for.",
+ arch:"Offchain TEE execution + onchain <b>Ethereum</b> settlement for deposits, withdrawals and custody via an omnibus account, with no bridge. An <b>attestor network</b> under a quorum model verifies the enclave's hardware code measurement against approved versions before launch, holds key fragments so no single party can assemble a key, and gates upgrades. Trust is <b>SGX remote attestation plus reproducible builds — explicitly not onchain auditability</b> — and execution uses a <b>single non-replicated enclave</b>, a liveness single point of failure. Ondo Chain is dead, superseded by the Ondo Network on 27 Jul 2026. Access via wallet or email, no documented KYC, geo-gated to non-US.",
+ lat:"N/D", latT:"N/D", latSort:9000,
+ lat2:"<b>No figure published</b> — only 'execution speed comparable to a centralized exchange.' Tens of µs to low single-digit ms internal, ~10–100 ms client RTT <span class='tag t-est'>EST</span> — basis: an in-memory offchain engine with SGX boundary-transition overhead, no colocation, cross-connect or FIX offered, and the only client timing primitive in the docs measured in seconds. Settlement finality is Ethereum-block-paced and applies only to deposits and withdrawals.",
+ notes:["<b>First venue to accept tokenized equities as perp margin</b> — SPYon and QQQon credit at min(qty × mark × (1−haircut), $100 k), LTV capped at 30% of non-USDC margin with Auto-Exchange above it.",
+   "The rationale is structural, not an incentive subsidy: a market maker's tokenized-AAPL hedge doubles as its margin, <b>roughly halving required capital</b>. Ondo concedes the asymmetry — sell-side hedges are capital-efficient, buy-side still needs a traditional broker.",
+   "<b>Regulatory split-brain.</b> Perps are deliberately offshore and non-US, while Oasis Pro — an SEC-registered broker-dealer, ATS and transfer agent that Ondo acquired — received FINRA authorization on 23 Jul 2026 for US tokenized NMS equities. <b>Perps are explicitly absent from the US offering.</b>",
+   "~27 markets, cross margin only, with a $500 k beta cap per market per account — which implies the OI reflects broad participation rather than a few whales.",
+   "<span class='flag'>DefiLlama appears to double-list this venue</span> — a separate, much smaller 'Ondo Perps' protocol page describes the identical product with no parent link."],
+ det:"Likely the largest equity/RWA-underlying perp book in existence; its DefiLlama neighbours are all crypto-underlying, and its real comparable in the niche is Ostium at roughly a third of the size. Funding is hourly on UTC boundaries with a ±1%/hr clamp justified as ≤75% of the initial-minus-maintenance margin gap, so funding alone cannot liquidate a compliant position."},
+
+{rank:17,name:"QFEX",oi:"$69 M",chain:"Off-chain (Arbitrum USDC rails)",cls:"CLOB",eng:"Offchain CLOB",engT:"e-clob",
+ engS:"'QFEX is a Central Limit Order Book (CLOB) exchange… runs on Amazon Web Services hosted in Tokyo,' written primarily in Rust. Oracles are used only for mark and index, never for fills. <b>24/7 perps on TradFi assets — US equities, indices, commodities and FX — not crypto perps.</b> Despite the perp-DEX bucket, this is not a DEX in any trust-minimized sense.",
+ micro:"The best-documented microstructure in the table, and deliberately anti-HFT. <b>Price-time priority is explicitly stated</b>: 'Orders are executed based on strict price-time priority rules.' Then a <b>100 ms IEX-style speed bump on aggressing limit orders</b>, with the critical carve-out documented verbatim in the FAQ — 'cancels and liquidity-adding orders are not affected' — and 'This delay applies uniformly regardless of the participant's technological sophistication or network connectivity.' <i>One internal inconsistency: the architecture page says the bump covers 'all limit orders including new submissions and modifications,' which reads as catching passive orders too.</i> <b>STP is documented</b> (passive order cancelled). Market, Limit, ALO, Stop (mark-triggered) plus <b>TWAP as a first-class order</b>; FOK/IOC/GTC; modify, cancel-all, cancel-on-disconnect. Maker floors at 0% — no negative rebate. Per-minute price bands (±10% equities, ±5% indices, ±2% FX), per-user OI capped at 10% of product OI, liquidations evaluated once per second 'simultaneously and on equal terms,' and a <b>separate cancel rate-limit bucket</b> so risk can be unwound even when the general bucket saturates.",
+ arch:"<b>Fully off-chain</b> — no smart contracts, no onchain book or settlement. DefiLlama's chain field is literally 'Off Chain.' The only onchain touchpoint is USDC deposits and withdrawals on <b>Arbitrum One</b>. Custody is with <b>BitGo Bank & Trust, N.A.</b>, an OCC-chartered national banking association — <b>not self-custodial</b>. <b>Mandatory KYC</b>, invite-only waitlist, and a long prohibited-jurisdiction list including the US and UK. Four-stage liquidation cascade backed by a Reserve Fund, with a Designated Liquidity Provider program where qualified MMs absorb the third stage at mark price.",
+ lat:"≥100 ms", latT:"DOC", latSort:100,
+ lat2:"The documented speed bump is the only hard number, so <b>effective taker latency is ≥100 ms</b> <span class='tag t-doc'>DOC</span>. QFEX's own about page claims '<b>microsecond-level latency</b>' <span class='tag t-mkt'>MKTG</span> — three orders of magnitude apart, describing different things, and QFEX never disambiguates them. Maker quote/cancel from AWS ap-northeast-1 ~1–5 ms; retail outside APAC ~150–250 ms+ <span class='tag t-est'>EST</span>.",
+ notes:["<b>TradFi-shaped throughout.</b> Leverage tiered by asset class — FX 50:1, gold and major indices 30:1, other commodities 20:1, <b>single equities only 10:1</b> — with notional caps that shrink to 50% overnight and 10% on weekends, plus an explicit corporate-actions policy and settlement calendar.",
+   "Fee tiering uses a weighted 'effective volume' — 1× FX, 2× commodities and indices, <b>5× single stocks</b> — which deliberately penalises hard-to-hedge assets.",
+   "Funding is <b>hourly, not 8-hourly</b>, another TradFi-ish choice.",
+   "<b>No token and no points program</b> — incentives are cash referral commissions at 30/3/2%. So volume is not points-farmed. That said, ~167× monthly turnover on ~$63 M OI reads as professional market-maker churn rather than retail directional flow.",
+   "$9.5 M seed led by <b>General Catalyst</b> at ~$95 M (Mar 2026), plus Y Combinator and Paul Graham. Founders ex-Flow Traders/Tower and ex-Citadel; team from Jump, HRT, Jane Street, Optiver. Uranium perps."],
+ det:"Two market-maker programs exist but neither is publicly specified — institutional connectivity is contact-gated to mm@qfex.com with no rebate, latency or protocol detail published. No FIX gateway is documented; transport is WebSocket, REST and a JSON CLI. An unresolved tension in the docs: domestic USD ACH rails are offered alongside the US being a prohibited jurisdiction."},
+
+{rank:18,name:"Nado",oi:"$65 M",chain:"Ink (Kraken OP Stack L2)",cls:"CLOB",eng:"Offchain CLOB",engT:"e-clob",
+ engS:"Hybrid CLOB — a Nado-operated offchain sequencer matches, and an onchain risk engine and clearinghouse on Ink compute exposures with unified cross-margin across spot, perps and money markets. Orders are EIP-712 signed, so the sequencer 'cannot censor trades or forge signatures' and holds no custody. <b>Architecturally a Vertex Protocol descendant</b> — the Ink contract set is verbatim Vertex's, down to Endpoint, Clearinghouse, PerpEngine and slow-mode transactions.",
+ micro:"<b>50 ms taker speedbump</b> — 'a fixed 50ms speed bump to all non-post-only orders (i.e., any aggressive order that would immediately cross and take liquidity from the book)' — with <b>post-only orders 'exempt and execut[ing] with zero added latency'</b>, giving makers a structural ~50 ms head start. Docs note it was <b>raised from 30 ms on 16 Feb 2026</b> and is 'currently uniform across all accounts and trading tiers' — no paid fast lane. Volume-tiered rebates from taker 3.5 bp / maker 1.0 bp down to <b>taker 1.5 bp / maker −0.8 bp</b> at $5 B, settled instantly in USDT0. A minimum-fee floor applies to sub-minimum takers; makers have none. Market, Limit, Stop, TWAP, TP/SL and Scaled orders; post-only, FOK, IOC; plus <b>dependent orders</b> that activate only once another order fills. Incentives carry a <b>toxicity adjustment</b> — Season 2 points share is set by 'trading activity, fee tier, and toxicity adjustments,' an unusual soft microstructure lever. <span class='flag'>Price-time priority is not stated and STP is undocumented</span> — the one API page that would settle it is 403-blocked.",
+ arch:"Offchain book, onchain custody, clearing, liquidations and withdrawals on Ink mainnet with published contract addresses. <b>Batch interval not disclosed.</b> Ink block time is <b>1 second</b> (sub-second 'coming soon,' not live) and its sequencer is <b>operated by Kraken</b>. Ink itself is a <b>Stage 1 optimistic rollup</b> with interactive fraud proofs that 'passes the walkaway test,' data posted to Ethereum as blobs — with caveats for operator MEV, a 12-hour forced-sequencing delay and no exit window for upgrades. At the app layer a slow-mode path exists (1 USDT0), but <span class='flag'>no Nado-level forced withdrawal for a censoring or permanently-down Nado sequencer is documented</span> — the key unresolved risk. <b>No audits found</b>; a bug bounty is advertised.",
+ lat:"~55–65 ms", latT:"DOC", latSort:60,
+ lat2:"Arithmetic on two documented figures: <b>5–15 ms matching</b> (stated on both the site and the docs architecture page) plus the <b>50 ms speedbump</b> <span class='tag t-doc'>DOC</span>. Post-only makers see 5–15 ms. Excludes network RTT. Trade → onchain inclusion ~1–3 s <span class='tag t-est'>EST</span>, low confidence since the batch interval is unpublished. Oracles: Stork ≥every 500 ms, Pyth every slot.",
+ notes:["Founded by <b>Kraken and Ink Foundation veterans</b>, running on Kraken's L2 with a Kraken-operated sequencer and planned Kraken UI integration — Kraken-adjacent by team and chain, but not documented as a Kraken corporate product.",
+   "The Vertex codebase reportedly did $135 B+ cumulative volume with no documented exploits, so this is battle-tested rather than novel.",
+   "Liquidations are <b>permissionless — nothing auto-liquidates</b>, a liquidator must submit — partial by design, with profit split 50/50 liquidator/insurance fund. But <b>the NLP vault front-runs perp liquidations</b> until its risk exposure crosses thresholds, a structural house advantage. Backstop waterfall: insurance fund → pro-rata socialized losses → depositor balances. ADL not documented.",
+   "NLP is <b>professionally managed, not a passive AMM</b> — USDT0 deployed via subaccounts run by institutional traders doing market-making and liquidation capture.",
+   "Unusual product surface: 20× leverage, unified cross-margin over spot + perps + money markets, non-crypto perps (XAG, WTI, FX) and <b>xStocks usable as collateral</b>, with a bespoke closed-hours oracle capped at 1% drift per tick. Volume is genuine but incentive-amplified — Season 2's bonus pool was cut to 2 M from Season 1's 8 M."],
+ det:"Note the two distinct sequencers, which are easy to conflate: Nado's app-level matching sequencer, and Ink's chain-level sequencer run by Kraken. DefiLlama shows real economics behind the incentives — $49 M TVL, $7.9 B 30-day perp volume, $20.2 M annualized revenue. No token exists."},
+
+{rank:19,name:"GMX",oi:"$62 M",chain:"Arbitrum · Avalanche · Botanix · MegaETH",cls:"Pool",eng:"Oracle-priced pool",engT:"e-pool",
+ engS:"'GMX routes every order against these pools and quotes the oracle index price rather than relying on an order book or external market makers.' The GM/GLV pool is the counterparty. Chainlink Data Streams supplies a <b>two-sided</b> price and the side used depends on direction — open long at ask, close long at bid, open short at bid, close short at ask — so <b>the oracle's own spread is the baseline cost</b>. Mark is the midpoint, used for display, funding and impact but never for execution.",
+ micro:"No book. The replacement is a two-step request/execute pipeline explicitly built 'to avoid front-running issues,' governed by one invariant stated verbatim: <b>'if the order was created at timestamp n, it should be executed with the oracle prices after timestamp n.'</b> You cannot pick your price because it does not exist when you commit; Data Streams is pull-based with commit-and-reveal. <b>Ordering is keeper-discretionary and permissioned — not FCFS and not fee-priority</b> — verified at source level (<code>executeOrder(...) onlyOrderKeeper</code>, no public execution path), and the execution fee is a gas reimbursement with excess refunded, not a priority bid. Known issues concede keepers can use different-timestamp prices, can force cancellation via insufficient gas, and that front-running order updates is tolerated 'if the probability of successful front-running is ≤ 50%.' Skew is priced through the fee tier — <b>0.04% if your trade reduces long/short imbalance, 0.06% if it increases it</b> — while price impact itself is now, per current docs, <b>only charged or credited when you close or decrease</b>. Frozen orders replace cancellation to stop deposit-then-execute gaming.",
+ arch:"Onchain settlement, custody and accounting (ExchangeRouter, DataStore, OrderHandler, bank contracts — split so contracts upgrade without fund migration). Offchain: the Chainlink Data Streams DON, oracle keepers, <b>whitelisted</b> order keepers, Gelato Relay for Express mode, and <b>Chaos Labs Edge Risk Oracles</b> setting dynamic impact parameters. Prices are validated onchain against Chainlink reference feeds with a max deviation factor. Trusted: the keeper whitelist (liveness and censorship, with no permissionless fallback), the DON, Chaos Labs, and the L2 sequencer — docs concede stale pricing is exploitable if the chain is down. Audited by Guardian, ABDK, Certora, Dedaub and Sherlock.",
+ lat:"~1–3 s", latT:"EST", latSort:2000,
+ lat2:"Docs say request→execution is 'typically a few seconds' <span class='tag t-doc'>DOC</span>. The binding constraint is the post-dated-oracle rule plus GMX's own 1-second signed-price cache, not block time <span class='tag t-est'>EST</span>. Notable negative finding: <b>Chainlink publishes no hard millisecond cadence for crypto Data Streams</b> — the strongest public statement is 'at least once per second,' so any 100 ms or 250 ms figure circulating for GMX is not in primary docs. MegaETH's 10 ms blocks make sub-second plausible, with oracle cadence becoming the floor.",
+ notes:["<b>V1 is dead — 'phased out since July 2025,'</b> days after a <b>$42 M cross-contract reentrancy exploit</b> of the V1 GLP pool on Arbitrum on 9 Jul 2025, where the vulnerability was itself introduced by an unaudited fix for a different bug. Funds were returned; the attacker kept a $5 M bounty. <i>GMX's docs never state the causal link — that is inference.</i> V2 runs a separate codebase and was unaffected.",
+   "Price impact is now <b>very cheap on majors</b> after Chaos Labs' Edge Risk Oracles went live — GMX cites 3.2 bp on a $30 M ETH long, which materially weakens the common 'V2 = high impact on size' characterisation.",
+   "<b>ADL is structurally necessary</b> because the pool is the counterparty, and it mainly bites synthetic markets where the index token differs from pool collateral. A family of PnL caps means LP NAV is explicitly short <i>capped</i> trader PnL.",
+   "<span class='flag'>GMX staking rewards are currently suspended</span> — bought-back GMX accumulates in treasury pending a $90 GMX price, so it is a deferred, price-conditional claim rather than a live fee share.",
+   "TradFi markets carry session-aware parameters: gold and oil at 100× on-hours, 25× off-hours, with higher price impact during off-hours."],
+ det:"Borrowing fees are paid to the pool rather than to the other side, split 63% to LPs and 37% to protocol; funding accrues per-second and settles event-driven whenever a transaction touches the market. Stop Market orders notably have no user-configurable acceptable price. The intro page's chain list is stale relative to the contract-addresses page, which publishes four chains."},
+
+{rank:20,name:"Ostium",oi:"$46 M",chain:"Arbitrum One",cls:"RFQ",eng:"RFQ on oracle pricing",engT:"e-rfq",
+ engS:"Not a CLOB. Current docs describe <b>RFQ layered on oracle pricing</b> with an offchain hedging book: 'the protocol solicits a live quote from its institutional partner network for each order.' Entry is the current oracle price — longs at ask, shorts at bid, mid only for triggers. RWA bid/ask arrive inside the signed price report's metadata; crypto and stocks add a <b>dynamic spread</b> producing a 'Price-After-Impact' driven by exponentially-decaying buy/sell volume imbalance.",
+ micro:"No book, so no priority. Fills are keeper-executed via Chainlink Automations and Gelato Functions, with the Gelato forwarder as the <b>sole authorized address</b> for TP/SL, liquidations and limit orders. Because the oracle is pull-based, fills are <b>next-price by construction</b> — there is no continuous push feed to race. Price impact is the maker analogue. <b>Funding is not skew-based — it is real-world carry</b>, derived from the futures term structure (Gaussian-weighted across contract months) or SOFR plus a 1–2% annualized broker premium, and it is <b>two-sided</b>, so one side can <i>earn</i> it in contango or backwardation. Liquidation triggers on a mid-price cross at 100% − (leverage/max × 25%) off a 25% collateral backstop, so a 200× position liquidates on under 0.4% adverse movement, with no partial recovery. <b>Market-hours logic is pushed into the oracle payload</b>: market orders are blocked when the underlying is closed, limit and stop orders queue and fire on reopen with gap risk, and stock positions above the overnight cap are force-closed at <b>3:45 PM ET — 'not optional… no grace period.'</b>",
+ arch:"Onchain on Arbitrum for the full position lifecycle, collateral custody, fee math and the vault; offchain for the oracle, keepers and hedging book. Oracle splits by class — Stork node infrastructure for RWAs, Chainlink Data Streams for crypto — reconciled by an Ostium-operated multi-publisher consensus signing layer. <span class='flag'>That price-authorisation path is the trust assumption, and it broke in production: on 15 July 2026 (14:18–14:23 UTC) an attacker forged prices and drained the vault</span>, opening BTC/USD at $5,000 and closing near $60,000 in one atomic transaction — <b>~$23.75 M</b>, with an ~$18 M USDC payout from the vault. Mechanism per rekt: 'a registered PriceUpKeep forwarder and future-dated authorized oracle reports.' <b>How the attacker obtained that ability is still officially unconfirmed</b> — the widely-repeated 'compromised signer key' is not established. Funds went through Tornado Cash. Ostium worked toward relaunch within the week; note its own blog, media page and docs contain <b>zero mention of the incident</b>. Audited by Zellic (×2), ThreeSigma and Pashov (×3).",
+ lat:"1–2 s", latT:"DOC", latSort:1500,
+ lat2:"'This typically takes 1–2 seconds' to open <span class='tag t-doc'>DOC</span>; oracles sub-second on both providers; liquidations 'within seconds.' No distribution data anywhere. ~1.0–1.6 s median <span class='tag t-est'>EST</span>, dominated by the keeper round trip. The two-transaction pull-oracle design is what puts Ostium in the ~1 s class rather than the ~10–100 ms class.",
+ notes:["<span class='flag'>Two widely-repeated premises are now wrong.</span> The vault is <b>not</b> the counterparty — 'It is not a counterparty to directional flow'; directional risk is hedged offchain through Jump, prime brokers and other institutional partners, with USDC rebalanced between the two books once daily.",
+   "And the waterfall is <b>inverted versus typical perp vaults: OLP is the senior, last-loss tranche.</b> A junior <b>Buffer</b> of affiliate and partner capital 'absorbs trader PnL first, in full, before any loss can reach OLP.' Post-upgrade, OLP's only yield is 30% of opening fees — no PnL upside.",
+   "<b>But the July 2026 exploit landed on OLP anyway</b>, with LP compensation still pending at reopen — the sharpest available real-world test of that waterfall.",
+   "RWA-first with 75 instruments across 6 classes. 200× on FX, indices and crypto; opening fee 3–5 bp with <b>no closing fee</b> and a $0.10 flat oracle fee refunded on full closes.",
+   "Backers include Coinbase Ventures, General Catalyst, GSR, Jump, Local Globe and Wintermute — note <b>Jump is both an investor and the one named market-maker hedging partner</b>. No token. <span class='flag'>DefiLlama OI reads $46 M, $150.9 M or $316.1 M depending on endpoint</span> — treat any single figure as unreliable."],
+ det:"The gitbook docs are deprecated; docs.ostium.com is canonical and describes a materially different post-JLU architecture. Two further trust assumptions worth noting: the offchain hedging book is unverifiable onchain, so LPs must trust that the matching gain is actually remitted at daily settlement, and the junior buffer is discretionary — posted by affiliates with no documented minimum, onchain guarantee or top-up obligation."}
+];
+
+const tb=document.getElementById('tb'), empty=document.getElementById('empty');
+let filter='all', q='', sortK='rank', sortAsc=true, open=new Set();
+
+function tagHtml(t){
+  const m={DOC:'t-doc',EST:'t-est',MKTG:'t-mkt','N/D':'t-nd'};
+  return `<span class="tag ${m[t]}">${t}</span>`;
+}
+function render(){
+  let rows=D.filter(d=>{
+    if(filter!=='all' && d.cls!==filter) return false;
+    if(!q) return true;
+    const hay=(d.name+d.eng+d.engS+d.micro+d.arch+d.lat2+d.notes.join(' ')+d.det+d.chain).toLowerCase();
+    return hay.includes(q);
+  });
+  rows.sort((a,b)=>{const r=(a[sortK]-b[sortK]);return sortAsc?r:-r;});
+  empty.style.display=rows.length?'none':'block';
+  tb.innerHTML=rows.map(d=>{
+    const isOpen=open.has(d.rank);
+    return `<tr>
+      <td>
+        <div class="rank">#${d.rank}</div>
+        <div class="nm">${d.name}</div>
+        <div class="oi">${d.oi} OI</div>
+        <div class="chain">${d.chain}</div>
+        <button class="toggle" data-r="${d.rank}">${isOpen?'− less':'+ more'}</button>
+      </td>
+      <td><span class="eng ${d.engT}">${d.eng}</span><div class="cellsub">${d.engS}</div></td>
+      <td><div class="cellsub">${d.micro}</div></td>
+      <td><div class="cellsub">${d.arch}</div></td>
+      <td><div class="lat">${d.lat} ${tagHtml(d.latT)}</div><div class="lat2">${d.lat2}</div></td>
+      <td><ul class="n">${d.notes.map(n=>`<li>${n}</li>`).join('')}</ul></td>
+    </tr>` + (isOpen?`<tr class="det"><td colspan="6"><div class="detail">
+        <h4>${d.name} — further detail</h4>${d.det}</div></td></tr>`:'');
+  }).join('');
+}
+document.addEventListener('click',e=>{
+  const c=e.target.closest('button.chip[data-f]');
+  if(c){filter=c.dataset.f;
+    document.querySelectorAll('button.chip[data-f]').forEach(b=>b.setAttribute('aria-pressed',b===c));
+    render();return;}
+  const t=e.target.closest('button.toggle');
+  if(t){const r=+t.dataset.r; open.has(r)?open.delete(r):open.add(r); render();return;}
+  const th=e.target.closest('th.sortable');
+  if(th){const k=th.dataset.k; sortAsc = (k===sortK)? !sortAsc : true; sortK=k;
+    document.querySelectorAll('th.sortable .ar').forEach(a=>a.textContent='↕');
+    th.querySelector('.ar').textContent=sortAsc?'▲':'▼'; render();return;}
+});
+document.getElementById('q').addEventListener('input',e=>{q=e.target.value.trim().toLowerCase();render();});
+document.getElementById('expandAll').addEventListener('click',e=>{
+  if(open.size===D.length){open.clear();e.target.textContent='Expand all';}
+  else{D.forEach(d=>open.add(d.rank));e.target.textContent='Collapse all';}
+  render();
+});
+render();
+</script>
+</body>
+</html>

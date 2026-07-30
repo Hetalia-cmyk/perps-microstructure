@@ -1,0 +1,62 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-flight one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      # The canonical link and the Open Graph / Twitter card tags need the real
+      # absolute origin, which isn't known until Pages is configured. The source
+      # keeps a __SITE_URL__ placeholder and it gets rewritten here, so nothing
+      # has to be hand-edited when the repo or account name changes.
+      - name: Inject canonical and Open Graph URLs
+        env:
+          BASE: ${{ steps.pages.outputs.base_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BASE}" ]; then
+            echo "::error::base_url was empty — is Pages enabled with source = GitHub Actions?"
+            exit 1
+          fi
+          CLEAN="${BASE%/}"
+          echo "Base URL: ${CLEAN}"
+          sed -i "s|__SITE_URL__|${CLEAN}|g" index.html
+          echo "--- injected ---"
+          grep -E 'canonical|og:url|og:image"|twitter:image' index.html || true
+          if grep -q '__SITE_URL__' index.html; then
+            echo "::error::placeholder still present after substitution"
+            exit 1
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
