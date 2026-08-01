@@ -1,0 +1,76 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        # Don't take the whole deploy down if Pages metadata isn't readable.
+        continue-on-error: true
+
+      # The absolute URLs in the canonical link and the Open Graph / Twitter card
+      # tags are baked into index.html as literals, because social scrapers read
+      # raw HTML and never run JavaScript or retry — so those tags must be
+      # correct in the file as committed, independent of any build step.
+      #
+      # This step only *corrects* them, and only if Pages reports a different
+      # origin than the baked-in one (repo renamed, moved to an org, custom
+      # domain added). If Pages metadata is unavailable, it leaves the literals
+      # alone rather than failing, so a branch-source deploy still ships a
+      # working page.
+      - name: Reconcile absolute URLs with the real Pages origin
+        env:
+          BASE: ${{ steps.pages.outputs.base_url }}
+          BAKED: https://hetalia-cmyk.github.io/perps-microstructure
+        run: |
+          set -uo pipefail
+          if [ -z "${BASE}" ]; then
+            echo "::notice::Pages base_url unavailable (branch-source deploy?) — keeping baked-in URLs: ${BAKED}"
+          else
+            CLEAN="${BASE%/}"
+            if [ "${CLEAN}" = "${BAKED}" ]; then
+              echo "Pages origin matches baked-in URLs (${BAKED}) — nothing to do."
+            else
+              echo "::notice::Pages origin ${CLEAN} differs from baked-in ${BAKED} — rewriting."
+              sed -i "s|${BAKED}|${CLEAN}|g" index.html
+            fi
+          fi
+          # Fail loudly if an unresolved placeholder ever reappears: a broken
+          # og:image renders as a blank card and is invisible from the page itself.
+          if grep -q '__SITE_URL__' index.html; then
+            echo "::error::unresolved __SITE_URL__ placeholder in index.html"
+            exit 1
+          fi
+          echo "--- social tags as deployed ---"
+          grep -E 'rel="canonical"|og:url|og:image"|twitter:image"' index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
